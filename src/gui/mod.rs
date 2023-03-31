@@ -1,6 +1,6 @@
 use typst::doc::Frame;
 use egui::{FontFamily, FontDefinitions, FontData};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::fs::read;
 
 mod shapes;

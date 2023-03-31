@@ -1,16 +1,14 @@
-use super::{shapes::Shapes, text::Text as _};
-use super::{MyApp};
-use egui::{Color32, PointerButton, InputState, Pos2};
+use super::text::Text as _;
+use super::MyApp;
+use egui::Color32;
 use egui::containers::Frame;
 use egui::style::Margin;
 use typst::doc::FrameItem::Text;
 
-const CELL_HEIGHT: f32 = 24.;
-const CELL_WIDTH: f32 = 30.;
 const LEFT_MARGIN: f32 = 30.;
 
 impl eframe::App for MyApp {
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
 
         let options = Frame {
             fill: Color32::DARK_GRAY,
