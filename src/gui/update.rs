@@ -4,6 +4,7 @@ use egui::{Color32, PointerButton, InputState, Pos2};
 use egui::containers::Frame;
 use egui::style::Margin;
 
+const CELL_HEIGHT: f32 = 24.;
 const CELL_WIDTH: f32 = 30.;
 const LEFT_MARGIN: f32 = 30.;
 
@@ -18,14 +19,16 @@ impl eframe::App for MyApp {
 
         egui::CentralPanel::default().frame(options).show(ctx, |ui| {
 
-            for page in &self.doc.pages {
+            let mut y_offset = CELL_HEIGHT;
+            for item in self.page.items() {
                 ui.draw_text(
-                    &format!("{:?}", page.text()),
+                    &format!("{:?}", item),
                     CELL_WIDTH * 10.,
-                    10.,
+                    y_offset,
                     18.,
                     Color32::BLACK,
                 );
+                y_offset += CELL_HEIGHT;
             }
         });
         

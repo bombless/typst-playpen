@@ -317,9 +317,9 @@ fn render(command: CompileSettings) -> StrResult<()> {
     let mut world = SystemWorld::new(root, &command.font_paths);
     world.reset();
     world.main = world.resolve(&command.input).map_err(|err| err.to_string()).unwrap();
-    let doc = typst::compile(&mut world).unwrap();
+    let mut doc = typst::compile(&mut world).unwrap();
 
-    gui::run(doc);
+    gui::run(&format!("{:?}", doc.title), doc.pages.pop().unwrap());
 
     Ok(())
 }

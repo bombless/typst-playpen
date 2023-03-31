@@ -1,20 +1,20 @@
-use typst::doc::Document;
+use typst::doc::Frame;
 
 mod shapes;
 mod text;
 mod update;
 struct MyApp {
-    doc: Document,
+    page: Frame,
 }
 
-pub(crate) fn run(doc: Document) {
+pub(crate) fn run(title: &str, page: Frame) {
     let options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(900.0, 800.0)),
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        title,
         options,
-        Box::new(|_cc| Box::new(MyApp { doc })),
+        Box::new(|_cc| Box::new(MyApp { page })),
     ).unwrap()
 }
