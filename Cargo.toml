@@ -22,3 +22,4 @@ typst = { git = "https://github.com/typst/typst", rev = "9414d5" }
 walkdir = "2.3.3"
 
 typst-library = { path = "./library" }
+eframe = "0.21.3"

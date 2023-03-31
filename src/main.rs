@@ -25,6 +25,8 @@ use typst::util::{Buffer, PathExt};
 use typst::World;
 use walkdir::WalkDir;
 
+mod gui;
+
 type CodespanResult<T> = Result<T, CodespanError>;
 type CodespanError = codespan_reporting::files::Error;
 
@@ -317,9 +319,7 @@ fn render(command: CompileSettings) -> StrResult<()> {
     world.main = world.resolve(&command.input).map_err(|err| err.to_string()).unwrap();
     let doc = typst::compile(&mut world).unwrap();
 
-    for page in doc.pages {
-        println!("{:?}", page.text());
-    }
+    gui::run(doc);
 
     Ok(())
 }
