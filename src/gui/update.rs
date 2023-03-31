@@ -1,8 +1,9 @@
-use super::{shapes::Shapes, text::Text};
+use super::{shapes::Shapes, text::Text as _};
 use super::{MyApp};
 use egui::{Color32, PointerButton, InputState, Pos2};
 use egui::containers::Frame;
 use egui::style::Margin;
+use typst::doc::FrameItem::Text;
 
 const CELL_HEIGHT: f32 = 24.;
 const CELL_WIDTH: f32 = 30.;
@@ -19,17 +20,22 @@ impl eframe::App for MyApp {
 
         egui::CentralPanel::default().frame(options).show(ctx, |ui| {
 
-            let mut y_offset = CELL_HEIGHT;
-            for item in self.page.items() {
+            for (point, item) in self.page.items() {
+                let text = if let Text(text) = item {
+                    text
+                } else {
+                    continue;
+                };
                 ui.draw_text(
-                    &format!("{:?}", item),
-                    CELL_WIDTH * 10.,
-                    y_offset,
-                    18.,
+                    &text.glyphs.iter().map(|x| x.c).collect::<String>(),
+                    point.x.to_pt() as f32,
+                    point.y.to_pt() as f32,
+                    text.size.to_pt() as f32,
                     Color32::BLACK,
                 );
-                y_offset += CELL_HEIGHT;
             }
+
+            self.debug = false;
         });
         
     }

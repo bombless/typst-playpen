@@ -5,6 +5,7 @@ mod text;
 mod update;
 struct MyApp {
     page: Frame,
+    debug: bool,
 }
 
 pub(crate) fn run(title: &str, page: Frame) {
@@ -18,6 +19,6 @@ pub(crate) fn run(title: &str, page: Frame) {
     eframe::run_native(
         title,
         options,
-        Box::new(|_cc| Box::new(MyApp { page })),
+        Box::new(|_cc| Box::new(MyApp { page, debug: true })),
     ).unwrap()
 }
