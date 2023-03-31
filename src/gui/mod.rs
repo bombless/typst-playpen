@@ -8,8 +8,11 @@ struct MyApp {
 }
 
 pub(crate) fn run(title: &str, page: Frame) {
+    let x = page.width().to_pt() as f32;
+    let y = page.height().to_pt() as f32;
+
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(900.0, 800.0)),
+        initial_window_size: Some(egui::vec2(x, y)),
         ..Default::default()
     };
     eframe::run_native(
