@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::fs::{self, File};
@@ -317,9 +318,9 @@ fn render(command: CompileSettings) -> StrResult<()> {
     let mut world = SystemWorld::new(root, &command.font_paths);
     world.reset();
     world.main = world.resolve(&command.input).map_err(|err| err.to_string()).unwrap();
-    let mut doc = typst::compile(&mut world).unwrap();
+    let doc = typst::compile(&mut world).unwrap();
 
-    gui::run(&format!("{:?}", doc.title), doc.pages.pop().unwrap());
+    gui::run(&format!("{:?}", doc.title), doc.pages[0].clone(), world.fonts[0].path.clone());
 
     Ok(())
 }
@@ -467,9 +468,6 @@ impl SystemWorld {
     fn new(root: PathBuf, font_paths: &[PathBuf]) -> Self {
         let mut searcher = FontSearcher::new();
         searcher.search_system();
-
-        #[cfg(feature = "embed-fonts")]
-        searcher.add_embedded();
 
         for path in font_paths {
             searcher.search_dir(path)
@@ -683,34 +681,6 @@ impl FontSearcher {
     /// Create a new, empty system searcher.
     fn new() -> Self {
         Self { book: FontBook::new(), fonts: vec![] }
-    }
-
-    /// Add fonts that are embedded in the binary.
-    #[cfg(feature = "embed-fonts")]
-    fn add_embedded(&mut self) {
-        let mut add = |bytes: &'static [u8]| {
-            let buffer = Buffer::from_static(bytes);
-            for (i, font) in Font::iter(buffer).enumerate() {
-                self.book.push(font.info().clone());
-                self.fonts.push(FontSlot {
-                    path: PathBuf::new(),
-                    index: i as u32,
-                    font: OnceCell::from(Some(font)),
-                });
-            }
-        };
-
-        // Embed default fonts.
-        add(include_bytes!("../../assets/fonts/LinLibertine_R.ttf"));
-        add(include_bytes!("../../assets/fonts/LinLibertine_RB.ttf"));
-        add(include_bytes!("../../assets/fonts/LinLibertine_RBI.ttf"));
-        add(include_bytes!("../../assets/fonts/LinLibertine_RI.ttf"));
-        add(include_bytes!("../../assets/fonts/NewCMMath-Book.otf"));
-        add(include_bytes!("../../assets/fonts/NewCMMath-Regular.otf"));
-        add(include_bytes!("../../assets/fonts/DejaVuSansMono.ttf"));
-        add(include_bytes!("../../assets/fonts/DejaVuSansMono-Bold.ttf"));
-        add(include_bytes!("../../assets/fonts/DejaVuSansMono-Oblique.ttf"));
-        add(include_bytes!("../../assets/fonts/DejaVuSansMono-BoldOblique.ttf"));
     }
 
     /// Search for fonts in the linux system font directories.
