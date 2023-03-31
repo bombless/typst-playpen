@@ -51,6 +51,9 @@ pub struct CliArguments {
 #[derive(Debug, Clone, Subcommand)]
 #[command()]
 enum Command {
+    /// Renders the input file
+    Render(RenderCommand),
+
     /// Compiles the input file into a PDF file
     Compile(CompileCommand),
 
@@ -59,6 +62,13 @@ enum Command {
 
     /// List all discovered fonts in system and custom font paths
     Fonts(FontsCommand),
+}
+
+/// Renders the input file
+#[derive(Debug, Clone, Parser)]
+pub struct RenderCommand {
+    /// Path to input Typst file
+    input: PathBuf,
 }
 
 /// Compiles the input file into a PDF file
@@ -130,6 +140,7 @@ impl CompileSettings {
     /// Panics if the command is not a compile or watch command.
     pub fn with_arguments(args: CliArguments) -> Self {
         let (input, output, watch) = match args.command {
+            Command::Render(command) => (command.input, None, false),
             Command::Compile(command) => (command.input, command.output, false),
             Command::Watch(command) => (command.input, command.output, true),
             _ => unreachable!(),
@@ -169,6 +180,7 @@ fn main() {
     let arguments = CliArguments::parse();
 
     let res = match &arguments.command {
+        Command::Render(_) => render(CompileSettings::with_arguments(arguments)),
         Command::Compile(_) | Command::Watch(_) => {
             compile(CompileSettings::with_arguments(arguments))
         }
@@ -284,6 +296,32 @@ fn compile_once(world: &mut SystemWorld, command: &CompileSettings) -> StrResult
             Ok(true)
         }
     }
+}
+
+fn render(command: CompileSettings) -> StrResult<()> {
+    let root = if let Some(root) = &command.root {
+        root.clone()
+    } else if let Some(dir) = command
+        .input
+        .canonicalize()
+        .ok()
+        .as_ref()
+        .and_then(|path| path.parent())
+    {
+        dir.into()
+    } else {
+        PathBuf::new()
+    };
+    let mut world = SystemWorld::new(root, &command.font_paths);
+    world.reset();
+    world.main = world.resolve(&command.input).map_err(|err| err.to_string()).unwrap();
+    let doc = typst::compile(&mut world).unwrap();
+
+    for page in doc.pages {
+        println!("{:?}", page.text());
+    }
+
+    Ok(())
 }
 
 /// Clear the terminal and render the status message.
