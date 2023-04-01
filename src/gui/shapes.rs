@@ -1,4 +1,4 @@
-use egui::{Stroke, Rect, Pos2, Rounding, Color32, Ui};
+use eframe::egui::{Stroke, Rect, Pos2, Rounding, Color32, Ui};
 
 pub trait Shapes {
     fn draw_rectangle_lines(

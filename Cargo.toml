@@ -11,7 +11,6 @@ clap = { version = "4.2.1", features = ["derive"] }
 codespan-reporting = "0.11.1"
 comemo = "0.2.0"
 dirs = "5.0.0"
-egui = "0.21.0"
 elsa = "1.8.0"
 memmap2 = "0.5.10"
 notify = "5.1.0"
@@ -22,4 +21,5 @@ typst = { git = "https://github.com/typst/typst", rev = "9414d5" }
 walkdir = "2.3.3"
 
 typst-library = { path = "./library" }
-eframe = "0.21.3"
+#eframe = "0.21.3"
+eframe = { path = "../egui-src/crates/eframe" }

@@ -1,32 +1,20 @@
 use typst::doc::Frame;
-use egui::{FontFamily, FontDefinitions, FontData};
+use eframe::{egui, epaint::FontFamily};
+use typst::doc::FrameItem::{Text, Group};
+use eframe::egui::{FontDefinitions, FontData};
 use std::path::PathBuf;
-use std::fs::read;
 
 mod shapes;
 mod text;
 mod update;
+
+#[derive(Default)]
 struct MyApp {
     page: Frame,
-    debug: bool,
+    display: bool,
 }
 
-pub(crate) fn run(title: &str, page: Frame, font: PathBuf) {
-
-    let content = read(&font).unwrap();
-
-    let mut fonts = FontDefinitions::default();
-
-    // Install my own font (maybe supporting non-latin characters):
-    fonts.font_data.insert("my_font".to_owned(),
-    FontData::from_owned(content)); // .ttf and .otf supported
-
-    // egui_ctx.set_fonts(fonts);
-
-    // Put my font first (highest priority):
-    fonts.families.get_mut(&FontFamily::Proportional).unwrap()
-        .insert(0, "my_font".to_owned());
-
+pub(crate) fn run(title: &str, page: Frame, _font: PathBuf) {
 
     let x = page.width().to_pt() as f32;
     let y = page.height().to_pt() as f32;
@@ -39,8 +27,28 @@ pub(crate) fn run(title: &str, page: Frame, font: PathBuf) {
         title,
         options,
         Box::new(|cc| {
-            cc.egui_ctx.set_fonts(fonts);
-            Box::new(MyApp { page, debug: true })
+            let mut defs = FontDefinitions::default();
+            collect_font_from_frame(&mut defs, &page);
+            
+            cc.egui_ctx.set_fonts(defs);
+            Box::new(MyApp { page, display: true })
         }),
     ).unwrap()
+}
+
+fn collect_font_from_frame(defs: &mut FontDefinitions, frame: &Frame) {
+    for (_, item) in frame.items() {
+        match item {
+            Text(text) => {
+                let font_ptr = unsafe { std::mem::transmute::<_, usize>(text.font.data()) };
+                let font_name = format!("font-{}", font_ptr);
+                if !defs.font_data.contains_key(&font_name) {
+                    defs.font_data.insert(font_name.clone(), FontData::from_owned(text.font.data().to_vec()));
+                    defs.families.insert(FontFamily::Name(font_name.clone().into()), vec![font_name.clone()]);
+                }
+            },
+            Group(group) => collect_font_from_frame(defs, &group.frame),
+            _ => (),
+        }
+    }
 }
